@@ -1,16 +1,32 @@
-FROM openjdk:17-slim
+FROM python:3.10-slim
 
-RUN apt-get update && apt-get install -y python3 python3-pip unzip curl
+# Install required packages
+RUN apt-get update && \
+    apt-get install -y openjdk-17-jdk wget unzip && \
+    apt-get clean
 
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
-COPY . /app
+# Set working directory
 WORKDIR /app
 
-RUN chmod +x /app/exomiser-cli-14.0.0/exomiser-cli-14.0.0.jar
+# Copy your app files
+COPY . .
 
+# Download and unzip Exomiser
+RUN wget https://github.com/exomiser/Exomiser/releases/download/14.0.0/exomiser-cli-14.0.0-distribution.zip && \
+    unzip exomiser-cli-14.0.0-distribution.zip && \
+    rm exomiser-cli-14.0.0-distribution.zip
+
+# Make sure the JAR is executable
+RUN chmod +x exomiser-cli-14.0.0/exomiser-cli-14.0.0.jar
+
+# Set environment variables
 ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
 
-CMD ["uvicorn", "app.exomiser_service:app", "--host", "0.0.0.0", "--port", "10000"]
+# Install Python dependencies
+RUN pip install --no-cache-dir -r requirements.txt
 
+# Expose port
+EXPOSE 8000
+
+# Run FastAPI app
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
