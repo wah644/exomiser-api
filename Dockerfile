@@ -25,8 +25,6 @@ ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Expose port
-EXPOSE 8000
 
-# Run FastAPI app
+EXPOSE 8000
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
